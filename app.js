@@ -8,7 +8,8 @@ const ejsMate = require('ejs-mate')
 const morgan = require('morgan')
 const catchAsync = require('./utils/catchAsync.js')
 const ExpressError = require('./utils/ExpressError.js')
-const {campgroundSchema} = require('./utils/schemas.js')
+const {campgroundSchema, reviewSchema} = require('./utils/schemas.js')
+const Review = require('./models/review.js')
 
 
 mongoose.connect('mongodb://localhost:27017/yelpCamp', {
@@ -47,6 +48,17 @@ const validateCampground = (req, res, next) => {
 	}
 }
 
+const validateReview = (req, res, next) => {
+	const {error} = reviewSchema.validate(req.body)
+	if(error){
+		const msg = error.details.map(elem => elem.message).join(', ')
+		throw new ExpressError(msg, 400)
+	}
+	else{
+		next()
+	}
+}
+
 app.get('/campgrounds', async (req, res) => {
 	const campgrounds = await Campground.find({})
 	res.render('campgrounds/index', {campgrounds})
@@ -58,7 +70,7 @@ app.get('/campgrounds/new', (req, res)=>{
 
 app.get('/campgrounds/:id', catchAsync(async (req, res, next)=>{
 	const {id} = req.params
-	const campground = await Campground.findById(id)
+	const campground = await Campground.findById(id).populate('reviews')
 	res.render('campgrounds/show', {campground})
 }))
 
@@ -86,6 +98,23 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res, next)=>{
 	const {id} = req.params
 	await Campground.findByIdAndDelete(id)
 	res.redirect('/campgrounds')
+}))
+
+app.post('/campgrounds/:id/reviews', catchAsync(async(req, res)=>{
+	const campground = await Campground.findById(req.params.id)
+	const review = new Review(req.body.review)
+	campground.reviews.push(review)
+	await review.save()
+	await campground.save()
+	res.redirect(`/campgrounds/${campground.id}`)
+}))
+
+app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async(req, res)=>{
+	const {id, reviewId} = req.params
+	await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}}) 
+	await Review.findByIdAndDelete(reviewId)
+	res.redirect(`/campgrounds/${id}`)
+
 }))
 
 app.all('*', (req, res, next) => {
