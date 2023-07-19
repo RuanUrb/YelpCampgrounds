@@ -13,28 +13,13 @@
 <body class="d-flex flex-column vh-100">
     <%-include('../partials/navbar') %>
     <main class="container mt-5">
+        <%-include('../partials/flash') %>
         <%- body %>
     </main>
     <%-include('../partials/footer')%>
-</body>
+    <script src='/js/validateForm.js'></script>
+
+  </body>
 </html>
 
-<script>
-    (function () {
-      'use strict'
-      const forms = document.querySelectorAll('.validated-form')
-    
-      Array.prototype.slice.call(forms)
-        .forEach(function (form) {
-          form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-              event.preventDefault()
-              event.stopPropagation()
-            }
-    
-            form.classList.add('was-validated')
-          }, false)
-        })
-    })()
-     </script>
     
