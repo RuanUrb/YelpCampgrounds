@@ -83,6 +83,10 @@ app.use((err, req, res, next) => {
 	res.status(statusCode).render('error.ejs', {err})
 })
 
-app.listen(5500, ()=>{
+const ip = '192.168.0.103'
+
+app.listen(5500, ip, ()=>{
 	console.log("Open...")
 })
+
+
