@@ -85,7 +85,7 @@ app.use((err, req, res, next) => {
 
 const ip = '192.168.0.103'
 
-app.listen(5500, ip, ()=>{
+app.listen(5500, ()=>{
 	console.log("Open...")
 })
 
