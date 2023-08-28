@@ -24,9 +24,13 @@ const seedDB = async () => {
             author: '64bad2062ad11f0c6e8f0f7a',
             location: `${citiesArray[random].city} - ${citiesArray[random].state}`,
             title: `${sample(first)}  ${sample(second)}`,
-            image: 'https://source.unsplash.com/collection/483251',
             description: 'No description for the time being',
-            price
+            price,
+            images: [
+                {url: 'https://res.cloudinary.com/dlwh01eif/image/upload/v1690397745/kpp7ngnaqnmyuipdvtmn.png',
+                filename: 'kpp7ngnaqnmyuipdvtmn'}
+            ]
+            
     })
         await c.save()
     }

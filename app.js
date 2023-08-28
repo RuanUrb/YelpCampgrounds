@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV !== 'production'){
+	require('dotenv').config()
+}
+
 const express = require('express')
 const app = express()
 const path = require('path')
@@ -82,8 +86,6 @@ app.use((err, req, res, next) => {
 	if(!err.message) err.message = 'Something went wrong.' 
 	res.status(statusCode).render('error.ejs', {err})
 })
-
-const ip = '192.168.0.103'
 
 app.listen(5500, ()=>{
 	console.log("Open...")

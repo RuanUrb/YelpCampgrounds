@@ -1,4 +1,5 @@
 const Campground = require('../models/campground')
+const {cloudinary} = require('../cloudinary')
 
 module.exports.index = async (req, res) => {
     const campgrounds = await Campground.find({})
@@ -10,7 +11,8 @@ module.exports.renderNewForm = (req, res)=>{
 }
 
 module.exports.createCampground = async(req, res, next)=>{
-    const c = new Campground(req.body.campground)
+	const c = new Campground(req.body.campground)
+	c.images = req.files.map(f=>({url: f.path, filename: f.filename}))
     c.author = req.user.id
     await c.save()
     req.flash('success', 'Successfully created a campground.')
@@ -43,9 +45,19 @@ module.exports.editForm = async (req, res, next)=>{
 }
 
 module.exports.updateCampground = async (req, res, next)=>{
+	console.log(req.body, req.files)
 	const {id} = req.params
 	const campground = await Campground.findById(id)
 	const camp = await Campground.findByIdAndUpdate(id, {...req.body.campground})
+	const imgs = req.files.map(f=>({url: f.path, filename: f.filename}))
+	campground.images.push(...imgs)
+	if(req.body.deleteImages){
+		for(let filename of req.body.deleteImages){
+			await cloudinary.uploader.destroy(filename)
+		}
+		await campground.updateOne({$pull: {images: {filename: {$in: req.body.deleteImages}}}})
+	}
+	await campground.save()
 	req.flash('success', 'Successfully update the campground.')
 	res.redirect(`/campgrounds/${id}`)
 }
