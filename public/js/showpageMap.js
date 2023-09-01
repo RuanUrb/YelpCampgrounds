@@ -7,6 +7,9 @@ const map = new mapboxgl.Map({
     zoom: 9
 })
 
+map.addControl(new mapboxgl.NavigationControl())
+
+
 new mapboxgl.Marker().setLngLat(myLocation)
 .setPopup(
     new mapboxgl.Popup({offset: 10})
