@@ -16,16 +16,16 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const User = require('./models/user.js')
 const helmet = require('helmet')
-
 const mongoSanitize = require('express-mongo-sanitize')
-
-
 const userRouters = require('./routes/user.js')
 const campgroundRoutes = require('./routes/campground.js')
 const reviewRoutes = require('./routes/review.js')
+const MongoDBStore = require("connect-mongo")(session)
 
 
-mongoose.connect('mongodb://localhost:27017/yelpCamp', {
+//mongodb://localhost:27017/yelpCamp my local db
+const cloudUrl = process.env.CLOUD_URL
+mongoose.connect(cloudUrl, {
 	useNewUrlParser: true})
 
 
@@ -91,9 +91,18 @@ app.use(
 );
 
 // session configuration cookie
+const store = new MongoDBStore({
+    url: cloudUrl,
+    secret: process.env.SESSION_SECRET,
+    touchAfter: 24*3600 //updates user session every 24 hours
+})
+
+store.on('error', (error)=>console.log(error))
+
 const sessionConfig = {
+    store: store,
 	name: 'mc',
-	secret: 'secrettohideyourpowerlevel',
+	secret: process.env.SESSION_SECRET,
 	//secure: true,        [SHOULD BE ON WHEN IN PRODUCTION] 
 	resave: false,
 	saveUninitialized: true,
